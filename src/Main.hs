@@ -1,7 +1,6 @@
 import CustomDatatypes
 import System.Environment
-import System.IO
-
+import Data.Maybe
 
 
 
@@ -30,7 +29,7 @@ runProgramByArg a input
     | isPrintCNF a = print (parseGramatics $ lines input)
     | otherwise = print "cau"
 
-parseGramatics :: [String] -> Gramatics 
+parseGramatics :: [String] -> Gramatics
 parseGramatics [] = error "Wrong input format!"
 parseGramatics [_] = error "Wrong input format!"
 parseGramatics [_,_] = error "Wrong input format!"
@@ -38,28 +37,33 @@ parseGramatics [_,_,_] = error "Wrong input format!"
 parseGramatics (x:y:z:xs) = let
     parsedNeterminals = parseSymbols x IsNeterminal
     parsedTerminals = parseSymbols y IsTerminal
+    parsedRules = parseRules xs parsedNeterminals parsedTerminals
     startNeterminal
+        | isNothing (lookup z parsedRules) = error "Missing rule, which starting with start terminal!"
         | z `elem` parsedNeterminals = z
         | otherwise = error "Starting symbol isn't neterminal!"
-    parsedRules = parseRules xs parsedNeterminals parsedTerminals
     in Gramatics parsedNeterminals parsedTerminals startNeterminal parsedRules
 
 
-parseRules :: [String] -> [String] -> [String] -> [(Neterminal,String)]
+parseRules :: [String] -> [Neterminals] -> [Terminals] -> [(Neterminals,String)]
 parseRules [] _ _ = error "No rules!"
 parseRules xs parsedNeterminals parsedTerminals  = map f xs
     where f rule = parseRule rule parsedNeterminals parsedTerminals
 
 
-parseRule :: String -> [String] -> [String] -> (Neterminal,String)
+parseRule :: String -> [Neterminals] -> [Terminals] -> (Neterminals,String)
 parseRule [] _ _ = error "Wrong rule format!"
 parseRule [_] _ _ = error "Wrong rule format!"
 parseRule [_,_] _ _ = error "Wrong rule format!"
 parseRule [_,_,_] _ _ = error "Wrong rule format!"
-parseRule (x:y:z:xs) parsedNeterminals parsedTerminals 
-    | [x] `elem` parsedNeterminals && y  == '-' && z == '>' = ([x],xs)
+parseRule (x:y:z:xs) parsedNeterminals parsedTerminals
+    | [x] `elem` parsedNeterminals && y  == '-' && z == '>' && evaluateRightSide xs parsedNeterminals parsedTerminals = ([x],xs)
     | otherwise = error "Error in rule format!"
 
+
+evaluateRightSide :: String -> [Neterminals] -> [Terminals] -> Bool
+evaluateRightSide [] _ _ = False
+evaluateRightSide xs parsedNeterminals parsedTerminals = foldl (\_ x -> [x] `elem` parsedNeterminals || [x] `elem` parsedTerminals) False xs
 --  let commands = parseCommands args
 
 
