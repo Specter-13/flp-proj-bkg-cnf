@@ -2,7 +2,7 @@ module Parser where
 import CustomDatatypes
 import Data.Maybe
 
--- parsing gramatics, which is syntacticaly correct into Gramatics datatype
+-- parsing gramatics with correct syntax into Gramatics datatype
 parseGramatics :: [String] -> Gramatics
 parseGramatics [] = error "Wrong input format!"
 parseGramatics [_] = error "Wrong input format!"
@@ -18,13 +18,13 @@ parseGramatics (x:y:z:xs) = let
         | otherwise = error "Starting symbol isn't neterminal!"
     in Gramatics parsedNeterminals parsedTerminals startNeterminal parsedRules
 
-
+-- parse array of Rules into array of tuples [(Neterminals,string)] in Gramatics datatype
 parseRules :: [String] -> [Neterminals] -> [Terminals] -> [(Neterminals,String)]
 parseRules [] _ _ = error "No rules!"
 parseRules xs parsedNeterminals parsedTerminals  = map f xs
     where f rule = parseRule rule parsedNeterminals parsedTerminals
 
-
+-- check syntax of one rule 
 parseRule :: String -> [Neterminals] -> [Terminals] -> (Neterminals,String)
 parseRule [] _ _ = error "Wrong rule format!"
 parseRule [_] _ _ = error "Wrong rule format!"
@@ -34,7 +34,7 @@ parseRule (x:y:z:xs) parsedNeterminals parsedTerminals
     | [x] `elem` parsedNeterminals && y  == '-' && z == '>' && evaluateRightSide xs parsedNeterminals parsedTerminals = ([x],xs)
     | otherwise = error "Error in rule format!"
 
-
+-- check syntax of right side of rule
 evaluateRightSide :: String -> [Neterminals] -> [Terminals] -> Bool
 evaluateRightSide [] _ _ = False
 evaluateRightSide [x] parsedNeterminals parsedTerminals = [x] `elem` parsedNeterminals || [x] `elem` parsedTerminals
@@ -42,9 +42,7 @@ evaluateRightSide (x:xs) parsedNeterminals parsedTerminals
     | [x] `elem` parsedNeterminals || [x] `elem` parsedTerminals = evaluateRightSide xs parsedNeterminals parsedTerminals 
     | otherwise = False 
 
-
-
-
+-- parse terminals and neterminals 
 parseSymbols :: String -> SymbolType -> [String]
 parseSymbols [] symbolType = let message = "No symbols of type " ++ show symbolType in error message
 parseSymbols xs symbolType

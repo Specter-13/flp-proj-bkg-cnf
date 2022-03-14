@@ -1,4 +1,5 @@
 import System.Environment
+import Data.List (intercalate)
 import CustomDatatypes
 import Parser
 
@@ -17,22 +18,30 @@ main = do
 
 --read input, whether from file or stdin
 readInput :: FilePath -> IO String
-readInput fileName = do
+readInput fileName =
     if fileName == "" then getContents else readFile fileName
 
---
+--run program based on input arguments
 runProgramByArg :: Arguments -> String -> IO ()
 runProgramByArg a input
-    | isPrintBKG a = print (parseGramatics $ lines input)
+    | isPrintBKG a = printBKG (parseGramatics $ lines input)
     | isPrintRules a = print (parseGramatics $ lines input)
     | isPrintCNF a = print (parseGramatics $ lines input)
     | otherwise = print "cau"
 
---  let commands = parseCommands args
+--print internal representation of BKG after syntax check
+printBKG :: Gramatics -> IO ()
+printBKG bkg = do
+    putStrLn (unwords' (neterminals bkg))
+    putStrLn (unwords' (terminals bkg))
+    putStrLn $ startingTerminal bkg
+    let rulesBasicFormat = map f (rules bkg)
+            where
+                f rule = fst rule ++ "->" ++ snd rule
+    putStrLn (intercalate "\n" rulesBasicFormat) 
 
-
---  rs <- sequence [getLine, getLine, getLine, getContentgetLines ]  
---  print (splitByComma (head rs))  
+unwords' :: [String] -> String
+unwords' = intercalate ","
 
 --parse program arguments
 parseCommands :: [String] -> Arguments
