@@ -13,8 +13,7 @@ main = do
  print arguments
  print (isPrintBKG arguments)
  content <- readInput $ filePath arguments
- print content
- runProgramByArg arguments
+ runProgramByArg arguments content
 
 
 --read input, whether from file or stdin
@@ -23,15 +22,17 @@ readInput fileName = do
     if fileName == "" then getContents else readFile fileName
 
 --
-runProgramByArg :: Arguments  -> IO ()
-runProgramByArg a
-    | isPrintBKG a = parseGramatics
-    | isPrintRules a = parseGramatics
-    | isPrintCNF a = parseGramatics
+runProgramByArg :: Arguments -> String -> IO ()
+runProgramByArg a input
+    | isPrintBKG a = parseGramatics input
+    | isPrintRules a = parseGramatics input
+    | isPrintCNF a = parseGramatics input
     | otherwise = print "cau"
 
-parseGramatics :: IO ()
-parseGramatics = print "ahoj"
+parseGramatics :: String -> IO ()
+parseGramatics input = print $ parseNeterminals $ head $ lines input
+
+
 
 --  let commands = parseCommands args
 
@@ -57,13 +58,23 @@ parseCommands (_:_:_) = error "Too many arguments"
 
 
 
+parseNeterminals :: String -> [String]
+parseNeterminals [] = error "No neterminals!"
+parseNeterminals xs
+    | head xs == ',' || last xs == ',' = error "Wrong format of Neterminals!"
+    | otherwise = foldr f [] xs
+        where
+            f x acc
+                | x `elem` ['A'..'Z'] = [x] : acc
+                | x == ',' = acc
+                | otherwise  =  error "Unexpected symbols in Neterminals"
 
-
-splitByComma :: String -> [String]
-splitByComma [] = []
-splitByComma (x:xs)
- | x == ',' = splitByComma xs
- | otherwise = [x] : splitByComma xs
+-- splitByComma :: String -> [String]
+-- splitByComma [] = []
+-- splitByComma (x:xs)
+--  | x == ',' = z: splitByComma xs
+--  | otherwise = [x] : z 
+--  where z = []
 
 -- createGramatics :: [String] -> Gramatics 
 -- createGramatics xs = foldl f [] xs

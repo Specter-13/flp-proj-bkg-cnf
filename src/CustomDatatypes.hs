@@ -1,11 +1,17 @@
 module CustomDatatypes where 
 
 
-data Gramatics = Gramatics { neterminals :: [String]  
-                         , terminals :: [String]  
-                         , startingTerminal :: String 
-                         , rules :: (String,String)    
+type Neterminal = String 
+type Terminals =  String 
+type StartNeterminal = String 
+type Rules = (Neterminal, String)
+
+data Gramatics = Gramatics { neterminals :: [Neterminal]  
+                         , terminals :: [Terminals]  
+                         , startingTerminal :: StartNeterminal 
+                         , rules :: (Neterminal,String)    
                          } deriving (Show)   
+                         
 data Arguments = Arguments{ isPrintBKG :: Bool
                         , isPrintRules :: Bool 
                         , isPrintCNF :: Bool
