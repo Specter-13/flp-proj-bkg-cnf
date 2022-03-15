@@ -1,8 +1,8 @@
 import System.Environment
-import Data.List (intercalate,nub,union)
+import Data.List (intercalate)
 import CustomDatatypes
 import Parser
---PRINT NA SETS!!!
+import RemoverOfSimpleRules
 
 -- Main program
 main :: IO ()
@@ -15,81 +15,10 @@ main = do
  runProgramByArg arguments content
 
 
-removeSimpleRules :: Gramatics -> [NaSets] -> Gramatics
-removeSimpleRules bkg naSets = Gramatics neters ter startTer (nub newRules)
-    where
-        neters = neterminals bkg
-        ter = terminals bkg
-        startTer = startingTerminal bkg
-        newRules = foldl f [] naSets
-            where
-                f acc x =  getRulesBasedOnNaSet x neters (rules bkg) ++ acc
-                    
 
 
---getRulesBasedOnNaSet ("E",["E","T","F"]) ["E","T"] [("E","EaT"), ("E","T"),("T","TbF"), ("T","F"),("F","cFc"),("F","i")] 
-
-getRulesBasedOnNaSet :: NaSets -> [Neterminals] -> [Rules] -> [Rules]
-getRulesBasedOnNaSet naSet neters rls = foldl f [] (snd naSet)
-    where
-        f acc x = getOnlyComplexRules x rls neters (fst naSet) ++ acc
-
-getOnlyComplexRules :: Neterminals -> [Rules] -> [Neterminals]-> Neterminals ->[Rules]
-getOnlyComplexRules neter rls neters firstNeter = foldl f [] rls
-    where f acc rl
-            | fst rl == neter && isComplexRule rl neters = (firstNeter,snd rl): acc
-            | otherwise = acc
-
-
-isComplexRule :: Rules -> [Neterminals]  -> Bool
-isComplexRule rl neter
-    | snd rl `notElem` neter = True
-    | otherwise = False
-
-
-createNaSets :: [Neterminals] -> [Rules] -> [NaSets]
-createNaSets neter rls = foldl f [] neter
-    where
-        f acc x = (x, nxSet)  : acc
-            where
-                nxSet = createNaSetRecursive x neter simpleRules [x]
-                    where 
-                        simpleRules = [x | x <- rls , fst x `elem` neter && snd x `elem` neter]  
-
--- create N_A set for neterminal A
-createNaSetForNeterminal :: Neterminals -> [Neterminals] ->[Rules] -> [String]
-createNaSetForNeterminal neterminal parsedNeterminals = foldl f [neterminal]
-    where
-        f acc x
-            | rightSide `elem` parsedNeterminals &&
-              rightSide `notElem` acc && -- = rightSide : acc
-              leftSide `elem` acc = rightSide : acc 
-            | otherwise = acc
-                where
-                    rightSide = snd x
-                    leftSide = fst x
-
-createNaSetRecursive :: Neterminals -> [Neterminals] ->[Rules] -> [String]-> [String]
-createNaSetRecursive neterminal parsedNeterminals simpleRules prev = let
-    accumulator = foldl f prev simpleRules
-        where f acc x 
-                | leftSide `elem` acc  && rightSide`notElem` acc = rightSide : acc 
-                | otherwise = acc
-                    where
-                        rightSide = snd x
-                        leftSide = fst x
-    in if accumulator == prev then accumulator else createNaSetRecursive neterminal parsedNeterminals simpleRules accumulator `union` prev
     
     
-    -- if accumulator \= prev then createNaSetRecursive neterminal parsedNeterminals accumulator
-    --         where accumulator = foldl f prev simpleRules
-    --                 where f acc x 
-    --                         | (fst x) `elem` acc = rightSide : acc 
-    --                         | otherwise = acc
-    -- else otherwise = accumulator
-
-    -- simpleRules = [x | x <- rls , fst x `elem` parsedNeterminals && snd x `elem` parsedNeterminals]  
-    -- in simpleRules
 --read input, whether from file or stdin
 readInput :: FilePath -> IO String
 readInput fileName =
