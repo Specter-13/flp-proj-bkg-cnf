@@ -1,5 +1,5 @@
 import System.Environment
-import Data.List (intercalate)
+import Data.List (intercalate,nub)
 import CustomDatatypes
 import Parser
 
@@ -9,50 +9,49 @@ main :: IO ()
 main = do
  args <- getArgs
  let arguments = parseCommands args
- print arguments
- print (isPrintBKG arguments)
+ --print arguments
+ --print (isPrintBKG arguments)
  content <- readInput $ filePath arguments
  runProgramByArg arguments content
 
 removeSimpleRules :: Gramatics -> [NaSets] -> Gramatics
-removeSimpleRules bkg naSets = Gramatics neter ter startTer newRules
+removeSimpleRules bkg naSets = Gramatics neters ter startTer (nub newRules)
     where
-        neter = neterminals bkg
-        ter = neterminals bkg
+        neters = neterminals bkg
+        ter = terminals bkg
         startTer = startingTerminal bkg
-        newRules = foldl f [] naSets 
-            where 
-                f acc x =  (leftSide,"ahpj"): acc 
-                    where
-                        leftSide = fst x
-                        naSetx = snd x
-                
-                
-                
+        newRules = foldl f [] naSets
+            where
+                f acc x =  getRulesBasedOnNaSet x neters (rules bkg) ++ acc
+                    
+
+
+--getRulesBasedOnNaSet ("E",["E","T","F"]) ["E","T"] [("E","EaT"), ("E","T"),("T","TbF"), ("T","F"),("F","cFc"),("F","i")] 
+
 getRulesBasedOnNaSet :: NaSets -> [Neterminals] ->[Rules] -> [Rules]
-getRulesBasedOnNaSet naSet neters rls = foldl f [] (snd naSet) 
-    where 
-        f acc x = getOnlyComplexRules x rls neters ++ acc
-            
-getOnlyComplexRules :: Neterminals -> [Rules] -> [Neterminals]-> [Rules] 
-getOnlyComplexRules neter rls neters = foldl f [] rls
-    where f acc rl 
-            | fst rl == neter && isComplexRule rl neters = (neter,snd rl): acc
+getRulesBasedOnNaSet naSet neters rls = foldl f [] (snd naSet)
+    where
+        f acc x = getOnlyComplexRules x rls neters (fst naSet) ++ acc
+
+getOnlyComplexRules :: Neterminals -> [Rules] -> [Neterminals]-> Neterminals ->[Rules]
+getOnlyComplexRules neter rls neters firstNeter = foldl f [] rls
+    where f acc rl
+            | fst rl == neter && isComplexRule rl neters = (firstNeter,snd rl): acc
             | otherwise = acc
 
 
-isComplexRule :: Rules -> [Neterminals]  -> Bool 
-isComplexRule rl neter 
-    | snd rl `notElem` neter = True 
-    | otherwise = False 
- 
+isComplexRule :: Rules -> [Neterminals]  -> Bool
+isComplexRule rl neter
+    | snd rl `notElem` neter = True
+    | otherwise = False
+
 
 createNaSets :: [Neterminals] -> [Rules] -> [NaSets]
 createNaSets neter rls = foldl f [] neter
-    where 
+    where
         f acc x = (x, nxSet)  : acc
             where
-                nxSet = createNaSetForNeterminal x neter rls 
+                nxSet = createNaSetForNeterminal x neter rls
 
 -- create N_A set for neterminal A
 createNaSetForNeterminal :: Neterminals -> [Neterminals] ->[Rules] -> [String]
@@ -76,14 +75,17 @@ readInput fileName =
 runProgramByArg :: Arguments -> String -> IO ()
 runProgramByArg a input
     | isPrintBKG a = printBKG (parseGramatics $ lines input)
-    | isPrintRules a = print (parseGramatics $ lines input)
+    | isPrintRules a = let
+        parsedBKG = parseGramatics $ lines input
+        naSets = createNaSets (neterminals parsedBKG) (rules parsedBKG)
+        withoutSimpleRulesBKG = removeSimpleRules parsedBKG naSets
+        in printBKG withoutSimpleRulesBKG
     | isPrintCNF a = print (parseGramatics $ lines input)
     | otherwise = print "cau"
 
 --print internal representation of BKG after syntax check
 printBKG :: Gramatics -> IO ()
 printBKG bkg = do
-    print bkg
     putStrLn (unwords' (neterminals bkg))
     putStrLn (unwords' (terminals bkg))
     putStrLn $ startingTerminal bkg
