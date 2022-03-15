@@ -19,13 +19,13 @@ parseGramatics (x:y:z:xs) = let
     in Gramatics parsedNeterminals parsedTerminals startNeterminal parsedRules
 
 -- parse array of Rules into array of tuples [(Neterminals,string)] in Gramatics datatype
-parseRules :: [String] -> [Neterminals] -> [Terminals] -> [(Neterminals,String)]
+parseRules :: [String] -> [Neterminals] -> [Terminals] -> [Rules]
 parseRules [] _ _ = error "No rules!"
 parseRules xs parsedNeterminals parsedTerminals  = map f xs
     where f rule = parseRule rule parsedNeterminals parsedTerminals
 
 -- check syntax of one rule 
-parseRule :: String -> [Neterminals] -> [Terminals] -> (Neterminals,String)
+parseRule :: String -> [Neterminals] -> [Terminals] -> Rules
 parseRule [] _ _ = error "Wrong rule format!"
 parseRule [_] _ _ = error "Wrong rule format!"
 parseRule [_,_] _ _ = error "Wrong rule format!"

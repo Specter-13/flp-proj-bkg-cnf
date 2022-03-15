@@ -11,7 +11,7 @@ data SymbolType = IsTerminal | IsNeterminal deriving (Show,Eq)
 data Gramatics = Gramatics { neterminals :: [Neterminals]  
                          , terminals :: [Terminals]  
                          , startingTerminal :: StartNeterminal 
-                         , rules :: [(Neterminals,String)]   
+                         , rules :: [Rules]   
                          } deriving (Show)   
                          
 data Arguments = Arguments{ isPrintBKG :: Bool

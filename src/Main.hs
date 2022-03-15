@@ -16,6 +16,17 @@ main = do
  runProgramByArg arguments content
 
 
+-- removeSimpleRules :: Gramatics -> Gramatics 
+-- removeSimpleRules bkg = let
+--     newRules = 
+
+-- createNaSets :: [Neterminals] -> [Rules] -> [[String]]
+-- createNaSets xs r = foldl f [] xs
+--     where
+--         f nASets neterminal = foldl f [] simpleRules
+--             where
+--                 f set r
+
 --read input, whether from file or stdin
 readInput :: FilePath -> IO String
 readInput fileName =
