@@ -1,11 +1,9 @@
-S,A,B,C,D,E,F
+S,A,B,C
 a,b
 S
-S->ABC
-S->FF
-S->Fa
-S->a
+S->aBC
 A->a
-B->a
-C->b
-F->a
+B->b
+C->a
+B->bbC
+B->AC

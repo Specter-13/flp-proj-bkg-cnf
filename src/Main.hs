@@ -22,55 +22,69 @@ convertToCnf bkg  = Gramatics neters ters startTer newRules
         ters = terminals bkg
         startTer = startingTerminal bkg
         oldRules = rules bkg
-        newRules = complexCnf
-        -- newRules = getTerminalRules oldRules ters ++ getDoubleNonTerminalRules oldRules neters ++ complexCnf
+        --newRules = complexCnf
+        newRules = getTerminalRules oldRules ters ++ getDoubleNonTerminalRules oldRules neters ++ complexCnf
             where complexCnf = foldl f [] (getComplexRules oldRules)
                     where
-                        f acc x =  createCnfRules (fst x) rigthSideComplex neters ters ++ acc
+                        f acc x =  (leftSideSimple,rigthSideComplex) : createCnfRules leftSideSimple rigthSideComplex neters ters ++ acc
                             where
-                                rigthSideComplex = createComplexNeterminal (snd x) 
+                                rigthSideComplex = createComplexNeterminal (snd x) ters
+                                leftSideSimple = fst x
 
 
+-- A->A<BC> = A
+getPrefixOfRightSide :: String  -> [Terminals] -> String
+getPrefixOfRightSide [] _ = error "Wrong input"
+getPrefixOfRightSide [_] _ = error "Wrong input"
+getPrefixOfRightSide [_,_] _ = error "Wrong input"
+getPrefixOfRightSide (x:y:xs) terms
+    | [x] `elem` terms && y == '\'' = x : [y]
+    | otherwise = [x]
+
+-- A->A<BC> = <BC> 
+getSufixOfRightSide :: String -> [Terminals] -> String
+getSufixOfRightSide [] _ = error "Wrong input"
+getSufixOfRightSide [_] _ = error "Wrong input"
+getSufixOfRightSide (x:xs) terms
+    | [x] `elem` terms = tail xs
+    | otherwise = xs
 
 
+-- <BCD> = B pr <bCD> = b'
+getFirstRightSufix :: String -> [Terminals] -> String
+getFirstRightSufix [] _ = error "Wrong input"
+getFirstRightSufix [_] _ = error "Wrong input"
+getFirstRightSufix [_,_] _ = error "Wrong input"
+getFirstRightSufix (_:y:xs) ters
+    | [y] `elem` ters = y : "'"
+    | otherwise = [y]
+
+-- get only rules, which lenght is more than 2
 getComplexRules :: [Rules] -> [Rules]
 getComplexRules = filter (\x -> length (snd x) > 2)
 
 -- ABC -> A<BC>
-createComplexNeterminal :: String -> String
-createComplexNeterminal [] = error "Empty list"
-createComplexNeterminal [_] = error "Not enough symbols"
-createComplexNeterminal (x:xs) = [x] ++ "<" ++ xs ++ ">"
+createComplexNeterminal :: String -> [Terminals] -> String
+createComplexNeterminal [] _ = error "Empty list"
+createComplexNeterminal [_] _ = error "Not enough symbols"
+createComplexNeterminal (x:xs) terms
+    | [x] `elem` terms = [x] ++ "'<" ++ xs ++ ">"
+    | otherwise  = [x] ++ "<" ++ xs ++ ">"
 
--- S -> A<BCD> createCnfRules "S" "<ABCD>" ["A","B","C","D","S"] ["a"]
+-- S -> A<BCD> createCnfRules "S" "A<BCD>" ["A","B","C","D","S"] ["a"]
 createCnfRules :: String -> String -> [Neterminals] -> [Terminals] -> [Rules]
-createCnfRules _ [] _ _ = error "Nothing"
-createCnfRules _ [x] _ _ = error "Nothing"
-createCnfRules _ [x,y] _ _ = error "Nothing"
-createCnfRules _ [x,y,w] _ _ = error "Nothing"
-createCnfRules _ [x,y,w,z] _ _ = error "Nothing"
-createCnfRules _ [x,y,w,z,d] _ _ = [(leftSide,rightSide)]
-    where
-        leftSide = [y, z, w, d]
-        rightSide = [z, w]
-createCnfRules left (x:y:z:xs) neters ters = (oldComplex,newComplex) : createCnfRules oldComplex newComplex neters ters
-    where
-        oldComplex = [y]++[z]++xs
-        newNeterminal = [y] ++ xs -- <CD>
-        firstRightSymbol = z -- B
-        newComplex = [firstRightSymbol] ++ newNeterminal --B<CD> 
+createCnfRules left right neters ters 
+    | length rightSufix == 4 = [(rightSufix,lastNeterminal)] -- end recursion when rigtsufix is <CD>
+    | otherwise = (rightSufix,newComplex) : createCnfRules rightSufix newComplex neters ters 
+    -- | otherwise =   (rightSufix,newComplex): (firstRightSufix,[head firstRightSufix]) : createCnfRules rightSufix newComplex neters ters
+        where
+            rightPrefix = getPrefixOfRightSide right ters -- A
+            rightSufix = getSufixOfRightSide right ters -- <BCD>
+            firstRightSufix = getFirstRightSufix rightSufix ters -- B or b'
+            newNeterminal = '<' : tail (tail rightSufix) -- <CD>
+            newComplex = firstRightSufix ++ newNeterminal -- B<CD>
+            lastNeterminal = init (tail rightSufix) -- CD
 
-    -- | length newRight == 4 =  newRule: [] -- <CD>
-    -- | otherwise = newRule : createCnfRules left newRight neters ters
-    --     where
-    --     firstRightSymbol = [head right] -- A
-    --     complexNeterminal = getComplexNeterminalFrom right -- <BCD>
-    --     newRight = "<" ++ tail (tail complexNeterminal) -- <CD>
-    --     newRule = (firstRightSymbol, newRight)
-    --     accumulator = newRule : createCnfRules left newRight neters ters
--- createCnfRules (x:xs) neters ters
---     | x `elem` ters = (x ++ "'", "<" ++ xs ">") : createCnfRules neters ters xs
---     | x `elem` neters = (x , "<" ++ xs ">") : createCnfRules neters ters xs
 
 -- get only rules in format A->b where b is terminal
 getTerminalRules :: [Rules] -> [Terminals] -> [Rules]
@@ -95,7 +109,7 @@ runProgramByArg :: Arguments -> String -> IO ()
 runProgramByArg a input
     | isPrintBKG a = printBKG parsedBKG
     | isPrintRules a = printBKG withoutSimpleRulesBKG
-    | isPrintCNF a = print cnfBKG
+    | isPrintCNF a = printBKG cnfBKG
     | otherwise = print "cau"
         where
             parsedBKG = parseGramatics $ lines input
