@@ -25,7 +25,7 @@ createNaSetRecursive neterminal parsedNeterminals simpleRules prev = let
     in if accumulator == prev then accumulator else createNaSetRecursive neterminal parsedNeterminals simpleRules accumulator `union` prev
 
 
---remove simple rules from parsed gramatics
+--remove simple rules from parsed gramatics and return new bkg gramatics
 removeSimpleRules :: Gramatics -> [NaSets] -> Gramatics
 removeSimpleRules bkg naSets = Gramatics neters ter startTer (nub newRules)
     where
@@ -41,11 +41,12 @@ getRulesBasedOnNaSet :: NaSets -> [Neterminals] -> [Rules] -> [Rules]
 getRulesBasedOnNaSet naSet neters rls = foldl f [] (snd naSet)
     where
         f acc x = getOnlyComplexRules x rls neters (fst naSet) ++ acc
+
 -- get complex rules for concrete neterminal A from N_A set
-getOnlyComplexRules :: Neterminals -> [Rules] -> [Neterminals]-> Neterminals ->[Rules]
+getOnlyComplexRules :: Neterminals -> [Rules] -> [Neterminals] -> Neterminals -> [Rules]
 getOnlyComplexRules neter rls neters firstNeter = foldl f [] rls
     where f acc rl
-            | fst rl == neter && isComplexRule rl neters = (firstNeter,snd rl): acc
+            | fst rl == neter && isComplexRule rl neters = (firstNeter, snd rl): acc
             | otherwise = acc
 
 -- help function which determine, whether rule is complex or not

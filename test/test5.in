@@ -1,0 +1,11 @@
+S,A,B,C,D,E,F
+a,b
+S
+S->ABC
+S->FF
+S->Fa
+S->a
+A->a
+B->a
+C->b
+F->a
