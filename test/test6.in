@@ -1,9 +1,13 @@
 S,A,B
-a,b
+a,b,c,d
 S
 S->aAB
 S->BA
-A->BBB
+A->BBb
+A->aaa
 A->a
 B->AS
 B->b
+B->Abb
+B->ccA
+B->Add
