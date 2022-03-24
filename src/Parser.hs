@@ -31,8 +31,13 @@ parseRule [_] _ _ = error "Wrong rule format!"
 parseRule [_,_] _ _ = error "Wrong rule format!"
 parseRule [_,_,_] _ _ = error "Wrong rule format!"
 parseRule (x:y:z:xs) parsedNeterminals parsedTerminals
-    | [x] `elem` parsedNeterminals && y  == '-' && z == '>' && evaluateRightSide xs parsedNeterminals parsedTerminals = ([x],xs)
+    | [x] `elem` parsedNeterminals && y  == '-' && z == '>' && evaluateRightSide xs parsedNeterminals parsedTerminals = ([x],splitRightSideOfRule xs)
     | otherwise = error "Error in rule format!"
+
+-- split right side of rule into list of strings
+splitRightSideOfRule :: String -> [String]
+splitRightSideOfRule [] = []
+splitRightSideOfRule (x:xs) = [x] : splitRightSideOfRule xs
 
 -- check syntax of right side of rule
 evaluateRightSide :: String -> [Neterminals] -> [Terminals] -> Bool
@@ -42,7 +47,7 @@ evaluateRightSide (x:xs) parsedNeterminals parsedTerminals
     | [x] `elem` parsedNeterminals || [x] `elem` parsedTerminals = evaluateRightSide xs parsedNeterminals parsedTerminals 
     | otherwise = False 
 
--- parse terminals and neterminals 
+-- parse terminals and neterminals - parsing first and second line
 parseSymbols :: String -> SymbolType -> [String]
 parseSymbols [] symbolType = let message = "No symbols of type " ++ show symbolType in error message
 parseSymbols xs symbolType

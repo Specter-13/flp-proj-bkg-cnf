@@ -4,7 +4,7 @@ module CustomDatatypes where
 type Neterminals = String 
 type Terminals =  String 
 type StartNeterminal = String 
-type Rules = (Neterminals, String)
+type Rules = (Neterminals, [String])
 type NaSets = (Neterminals, [String])
 
 data SymbolType = IsTerminal | IsNeterminal deriving (Show,Eq)

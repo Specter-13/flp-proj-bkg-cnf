@@ -10,17 +10,18 @@ createNaSets neter rls = foldl f [] neter
             where
                 nxSet = createNaSetRecursive x neter simpleRules [x]
                     where 
-                        simpleRules = [rule | rule <- rls , fst rule `elem` neter && snd rule `elem` neter]  
+                        simpleRules = [rule | rule <- rls , fst rule `elem` neter && length (snd rule ) == 1 && head (snd rule) `elem` neter]
+
 
 -- for neterminal create N_A set based on algorithm 4.5 from TIN
 createNaSetRecursive :: Neterminals -> [Neterminals] ->[Rules] -> [String]-> [String]
 createNaSetRecursive neterminal parsedNeterminals simpleRules prev = let
     accumulator = foldl f prev simpleRules
         where f acc x 
-                | leftSide `elem` acc  && rightSide`notElem` acc = rightSide : acc 
+                | leftSide `elem` acc  && rightSide `notElem` acc = rightSide : acc 
                 | otherwise = acc
                     where
-                        rightSide = snd x
+                        rightSide = head (snd x)
                         leftSide = fst x
     in if accumulator == prev then accumulator else createNaSetRecursive neterminal parsedNeterminals simpleRules accumulator `union` prev
 
@@ -52,5 +53,7 @@ getOnlyComplexRules neter rls neters firstNeter = foldl f [] rls
 -- help function which determine, whether rule is complex or not
 isComplexRule :: Rules -> [Neterminals]  -> Bool
 isComplexRule rl neter
-    | snd rl `notElem` neter = True
-    | otherwise = False
+    | length (snd rl) == 1 &&  head rightSide `elem` neter = False
+    | otherwise = True 
+        where 
+            rightSide = snd rl

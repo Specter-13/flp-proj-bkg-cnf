@@ -1,9 +1,5 @@
-S,A,B,C
-a,b
+S,A,B,C,D
+a,b,d
 S
-S->aBC
+S->A
 A->a
-B->b
-C->a
-B->bbC
-B->AC
