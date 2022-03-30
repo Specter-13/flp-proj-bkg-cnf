@@ -66,7 +66,7 @@ createCnfRules rls neters ters = foldl f ([],[]) treblePlusRules
 -- S -> A<BC> ===  <BC> -> BC
 createNewNeterminals :: Rules -> [Neterminals] -> [Terminals] -> ([Rules],[Neterminals])
 createNewNeterminals rl _ ters
-    | length suffix == 4 = ([(suffix,suffixArrayRaw)],newNeters) -- end recursion when rightsuffix is <CD>
+    | length suffix == 4 = (lastRule, lastNewNeters ++ newNeters) -- end recursion when rightsuffix is <CD>
     | otherwise = ((suffix,newNeterminal) : fst newNeterminalsTuple, newNeters ++ snd newNeterminalsTuple )
         where
             (_,[_,suffix]) = rl-- S -> ABC === S -> A<BC>
@@ -89,6 +89,8 @@ createNewNeterminals rl _ ters
                     firstSymbol = head newNeterminal
                     secondSymbol = [last (init suffix)]
             newNeterminalsTuple = createNewNeterminals newRule newNeters ters
+            lastRule = [(suffix,suffixArrayRaw)]
+            lastNewNeters = getNewNeterminalsDoubleMixedRules [(suffix,suffixArrayRaw)]
 
 
 

@@ -1,6 +1,4 @@
-S,A,B
+S,A,B,C,D
 a,b,c,d
 S
-S->AB
-S->Bc
-S->cc
+S->Cda

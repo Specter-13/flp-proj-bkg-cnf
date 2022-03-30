@@ -36,7 +36,7 @@ runProgramByArg a input
             parsedBKG = parseGramatics $ lines input
             naSets = createNaSets (neterminals parsedBKG) (rules parsedBKG)
             withoutSimpleRulesBKG = removeSimpleRules parsedBKG naSets
-            cnfBKG = convertToCnf parsedBKG
+            cnfBKG = convertToCnf withoutSimpleRulesBKG
 
 --print internal representation of BKG after syntax check
 printBKG :: Gramatics -> IO ()
