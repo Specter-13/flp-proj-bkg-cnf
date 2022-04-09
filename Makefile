@@ -8,12 +8,15 @@ build:
 move:
 	mv src/flp21-fun flp21-fun 
 
-testing:
+testing: build
 	cd scripts; \
 	./tester.sh
 
 clean:
-	rm test/*.out
-	rm flp21-fun
+	rm test/*.out flp21-fun 
+	cd src; \
+	rm *.o *.hi Main
 
+zip:
+	zip -r flp-fun-xspavo00.zip src test scripts doc Makefile 
 

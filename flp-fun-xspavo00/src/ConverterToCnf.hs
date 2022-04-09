@@ -1,6 +1,13 @@
+-- FLP proj 1 - BKG-2-CNF
+-- Author: Dávid Špavor (xspavo00)
+-- File: ConverterToCnf.hs
+-- Year: 2022
 module ConverterToCnf where 
 import CustomDatatypes
+    ( Gramatics(..), Neterminals, Rules, Terminals )
 import Data.List (nub)
+
+
 -- get only rules in format A->b where b is terminal
 getTerminalRules :: [Rules] -> [Terminals] -> [Rules]
 getTerminalRules rls ters = filter isTerminalRule rls
@@ -24,13 +31,16 @@ getTreblePlusRules = filter isTreble
             where
                 rightSide = snd rl
 
+-- from rules filter only apostrophe rules
 filterApostropheRules :: [Neterminals] -> [Terminals] -> [Neterminals]
 filterApostropheRules neters ters = filter (\x -> [head x] `elem` ters) neters
 
+-- create apostrophe rules
 createApostropheRules :: [Neterminals] -> [Rules]
 createApostropheRules = foldl f []
     where f acc x = (x,[[head x]]):acc
 
+--main function for conversion to cnf
 convertToCnf :: Gramatics -> Gramatics
 convertToCnf bkg  = Gramatics neters ters startTer newRules
     where
@@ -111,13 +121,14 @@ createFirstNewFormat (left,y:ys) ters = newFormat
             | y `elem` ters = (left,[y++"\'","<" ++ concat ys ++ ">"])
             | otherwise  = (left,[y,"<" ++ concat ys ++ ">"])
 
-
+-- get mixed rules of terminals and neterminals f.i. A->aB
 getDoubleMixedRules :: [Rules] -> [Terminals] -> [Rules]
 getDoubleMixedRules rls ters = filter isDoubleMixedRule rls
     where
         isDoubleMixedRule rl = length rightSide == 2 && (head rightSide `elem` ters || last rightSide `elem` ters)
             where rightSide = snd rl
 
+-- map mixed rules to new rules
 mapDoubleMixedRules :: [Rules] -> [Terminals] -> [Rules]
 mapDoubleMixedRules [] _ = []
 mapDoubleMixedRules rls ters = map f rls
@@ -134,6 +145,7 @@ mapDoubleMixedRules rls ters = map f rls
                     newFirst = first ++ "\'"
                     newSecond = second  ++ "\'"
 
+-- get newly created neterminals from double mixed rules
 getNewNeterminalsDoubleMixedRules :: [Rules] -> [String]
 getNewNeterminalsDoubleMixedRules = foldl f []
     where f acc x 

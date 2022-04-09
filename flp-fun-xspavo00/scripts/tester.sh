@@ -20,7 +20,6 @@ do
     echo "Testing $filename ..."
     ./flp21-fun -2 $filename > $outputFilePath
     
-
     diff $outputFilePath $refFile
 
     if [ $? == '0' ] 

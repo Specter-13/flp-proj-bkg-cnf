@@ -1,0 +1,7 @@
+S,A,B,C,D,d',a',<da>
+a,b,c,d
+S
+S->C<da>
+<da>->d'a'
+a'->a
+d'->d

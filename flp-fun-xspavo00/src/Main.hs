@@ -1,9 +1,15 @@
+-- FLP proj 1 - BKG-2-CNF
+-- Author: Dávid Špavor (xspavo00)
+-- File: Main.hs
+-- Year: 2022
 import System.Environment
 import Data.List (intercalate)
 import CustomDatatypes
-import Parser
-import RemoverOfSimpleRules
-import ConverterToCnf
+    ( Arguments(..),
+      Gramatics(neterminals, terminals, startingTerminal, rules) )
+import Parser ( parseGramatics )
+import RemoverOfSimpleRules ( createNaSets, removeSimpleRules )
+import ConverterToCnf ( convertToCnf )
 
 
 -- Main program
@@ -11,6 +17,8 @@ main :: IO ()
 main = do
  args <- getArgs
  let arguments = parseCommands args
+ --print arguments
+ --print (isPrintBKG arguments)
  content <- readInput $ filePath arguments
  runProgramByArg arguments content
 
@@ -26,8 +34,8 @@ runProgramByArg :: Arguments -> String -> IO ()
 runProgramByArg a input
     | isPrintBKG a = printBKG parsedBKG
     | isPrintRules a = printBKG withoutSimpleRulesBKG
-    | isPrintCNF a = printBKG cnfBKG 
-    | otherwise = error "Error! Wrong mix of arguments!"
+    | isPrintCNF a = printBKG cnfBKG -- fix!
+    | otherwise = print "cau"
         where
             parsedBKG = parseGramatics $ lines input
             naSets = createNaSets (neterminals parsedBKG) (rules parsedBKG)
